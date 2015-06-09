@@ -4,6 +4,9 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var expressSession = require('express-session');
+var passport = require ("passport");
+var passportLocal = require ("passport-local");
 
 var routes = require('./routes/index');
 var users = require('./routes/users');
@@ -19,15 +22,54 @@ app.set('view engine', 'ejs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
+
+
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(expressSession({ 
+    secret: process.env.SESSION_SECRET || "secret",
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new passportLocal.Strategy(function(username, password, done){
+    //pretend this is using a real database.
+    if(username === password){
+        done(null,{id: username, name:username});
+    } else{
+        done(null,null);//second param is user object.
+    }
+}));
 
-app.use('/', routes);
+app.use(express.static(path.join(__dirname, 'public')));
+//app.use('/', routes);
 app.use('/users', users);
 app.use("/alumnos", alumnos.router);
+passport.serializeUser(function(user,done){
+    done(user.id);
+});
+passport.deserializeUser(function(id,done){
+//query database or cacke here
+    done({id: id, name:id});
+});
+
+app.get("/", function(req, res){
+    res.render("inicio",{
+        isAuthenticated: req.isAuthenticated(),
+        user: req.user
+    });
+});
+app.get("/login", function(req, res){
+    res.render("login");
+});
+app.post("/login", passport.authenticate("local"), function(req, res){
+    //it succeds it will stick a token for the user in session state in req.user
+    res.redirect("/");
+});
+
 
 
 // catch 404 and forward to error handler

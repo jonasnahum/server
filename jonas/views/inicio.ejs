@@ -1,0 +1,16 @@
+ <!DOCTYPE html>
+<html>
+<head>
+
+    <title>Example of passport</title>
+</head>
+
+<body>
+    <% if (!isAuthenticated) { %>
+        <a href="/login">Log in here</a>
+    <% } else { %>
+        Hello, <% user.name %>!
+    <% } %>
+</body>
+
+</html> 
