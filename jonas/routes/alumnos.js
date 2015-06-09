@@ -13,18 +13,24 @@ exports.init = function () {
     };
     
     AlumnosController.prototype.register = function () {
+        this.router.get('/crear', function(req, res, next) {
+               res.render('diagonalCrear');
+        });
         this.router.post('/crear', function(req, res, next) {
             
             req.accepts('application/json');
-            
-            var model = req.body;
+
+
                 
-            var endpoint = db.save(model);
+            var endpoint = db.save(req.body);
             var promise = factory.getPromise(endpoint);
             
             promise.then(function(args) {
                 var couchRes = args[0], body = args[1];
-                res.status(couchRes.statusCode).json(body);
+                res.locals.userName = req.body.userName;
+                res.locals.apellido = req.body.apellido;
+                res.locals.edad = req.body.edad;
+                res.status(couchRes.statusCode).render('diagonalPost');
             });
             
             promise.fail(function(err, couchRes, body) {
@@ -43,7 +49,11 @@ exports.init = function () {
             
             promise.then(function(args) {
                 var couchRes = args[0], body = args[1];
-                res.status(couchRes.statusCode).json(body);
+                var model = JSON.parse(body);
+                res.locals.userName = model.userName;
+                res.locals.apellido = model.apellido;
+                res.locals.edad = model.edad;
+                res.status(couchRes.statusCode).render("diagonalVer");
             });
             
             promise.fail(function(err, couchRes, body) {
