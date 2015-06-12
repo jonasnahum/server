@@ -17,13 +17,7 @@ exports.init = function () {
                res.render('diagonalCrear');
         });
         this.router.post('/crear', function(req, res, next) {
-        
-        
-        
-        
             req.accepts('application/json');
-
-                
             var endpoint = db.save(req.body);
             var promise = factory.getPromise(endpoint);
             
@@ -42,11 +36,13 @@ exports.init = function () {
                 });
             });
         });
+        this.router.get('/ver', function(req, res, next) {
+               res.render('ver');
+        });
         
         /* GET obtiene un contribuyente por su id. */
-        this.router.get('/ver/:id', function(req, res, next) {
-            
-            var endpoint = db.view(req.params.id);
+        this.router.post('/ver', function(req, res, next) {
+            var endpoint = db.view(req.body.id);
             var promise = factory.getPromise(endpoint);
             
             promise.then(function(args) {
