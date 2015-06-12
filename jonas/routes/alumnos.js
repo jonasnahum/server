@@ -17,9 +17,11 @@ exports.init = function () {
                res.render('diagonalCrear');
         });
         this.router.post('/crear', function(req, res, next) {
-            
+        
+        
+        
+        
             req.accepts('application/json');
-
 
                 
             var endpoint = db.save(req.body);

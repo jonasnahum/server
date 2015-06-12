@@ -9,7 +9,8 @@
     <% if (!isAuthenticated) { %>
         <a href="/login">Log in here</a>
     <% } else { %>
-        Hello, <% user.name %>!
+        Hello, <%= user.name %>!
+        <a href="/menu">Menu</a>
     <% } %>
 </body>
 

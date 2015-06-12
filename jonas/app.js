@@ -2,14 +2,13 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+var express = require('express');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var expressSession = require('express-session');
-var passport = require ("passport");
-var passportLocal = require ("passport-local");
-
-var routes = require('./routes/index');
-var users = require('./routes/users');
+    
+var loginFactory = require('./routes/login.js').init();
+var login = new loginFactory();
 var AlumnosController = require('./routes/alumnos.js').init();
 var alumnos = new AlumnosController();
 
@@ -19,9 +18,6 @@ var app = express();
 app.set('views', path.join(__dirname, 'views'));
 app.engine('ejs', require ('ejs').renderFile);
 app.set('view engine', 'ejs');
-
-// uncomment after placing your favicon in /public
-//app.use(favicon(__dirname + '/public/favicon.ico'));
 
 
 app.use(logger('dev'));
@@ -33,44 +29,15 @@ app.use(expressSession({
     resave: false,
     saveUninitialized: false
 }));
-app.use(passport.initialize());
-app.use(passport.session());
-passport.use(new passportLocal.Strategy(function(username, password, done){
-    //pretend this is using a real database.
-    if(username === password){
-        done(null,{id: username, name:username});
-    } else{
-        done(null,null);//second param is user object.
-    }
-}));
 
+// uncomment after placing your favicon in /public
+//app.use(favicon(__dirname + '/public/favicon.ico'));
+app.use(logger('dev'));
 app.use(express.static(path.join(__dirname, 'public')));
-//app.use('/', routes);
-app.use('/users', users);
+
+
 app.use("/alumnos", alumnos.router);
-passport.serializeUser(function(user,done){
-    done(user.id);
-});
-passport.deserializeUser(function(id,done){
-//query database or cacke here
-    done({id: id, name:id});
-});
-
-app.get("/", function(req, res){
-    res.render("inicio",{
-        isAuthenticated: req.isAuthenticated(),
-        user: req.user
-    });
-});
-app.get("/login", function(req, res){
-    res.render("login");
-});
-app.post("/login", passport.authenticate("local"), function(req, res){
-    //it succeds it will stick a token for the user in session state in req.user
-    res.redirect("/");
-});
-
-
+app.use("/", login.router);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
